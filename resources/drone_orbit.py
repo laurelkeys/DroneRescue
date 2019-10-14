@@ -6,10 +6,11 @@ import math
 import time
 import argparse
 from PIL import Image
+from typing import List
 
 
 class Position:
-    def __init__(self, pos):
+    def __init__(self, pos: airsim.Vector3r) -> None:
         self.x = pos.x_val
         self.y = pos.y_val
         self.z = pos.z_val
@@ -18,33 +19,31 @@ class Position:
 
 
 class OrbitNavigator:
-    def __init__(self, photo_prefix="photo_", radius=2, altitude=10, speed=2, iterations=1, center=[1, 0], snapshots=None, image_dir="./images/"):
-        self.radius = radius
-        self.altitude = altitude
-        self.speed = speed
-        self.iterations = iterations
-        self.snapshots = snapshots
+    def __init__(self, 
+                 photo_prefix: str = "photo_", 
+                 radius: float = 2, altitude: float = 10, speed: float = 2, 
+                 iterations: float = 1, center: List[float] = [1, 0], snapshots: float = None, 
+                 image_dir: str = "./images/") -> None:
+        assert(len(center) == 2), "Expecting '[x,y]' for the center direction vector"
+        
+        self.radius         = radius
+        self.altitude       = altitude
+        self.speed          = speed
+        self.iterations     = iterations if iterations > 0 else 1
+        self.snapshots      = snapshots
         self.snapshot_delta = None
-        self.next_snapshot = None
-        self.image_dir = image_dir
-        self.z = None
+        self.next_snapshot  = None
         self.snapshot_index = 0
-        self.photo_prefix = photo_prefix
-        self.takeoff = True # whether we did a take off
+        self.photo_prefix   = photo_prefix
+        self.image_dir      = image_dir
+        self.z              = None
+        self.takeoff        = True # whether we did a take off
 
         if self.snapshots is not None and self.snapshots > 0:
             self.snapshot_delta = 360 / self.snapshots
 
-        if self.iterations <= 0:
-            self.iterations = 1
-
-        if len(center) != 2:
-            raise Exception(
-                "Expecting '[x,y]' for the center direction vector")
-
         # center is just a direction vector, so normalize it to compute the actual cx,cy locations
-        cx = float(center[0])
-        cy = float(center[1])
+        cx, cy = center
         length = math.sqrt((cx*cx)+(cy*cy))
         cx /= length
         cy /= length
@@ -60,7 +59,7 @@ class OrbitNavigator:
         start = time.time()
         count = 0
         while count < 100:
-            pos = self.home
+            pos = self.home # FIXME won't pos and self.home point to the same addr and thus always have equal z_val?
             if abs(pos.z_val - self.home.z_val) > 1:
                 count = 0
                 self.home = pos
@@ -75,7 +74,7 @@ class OrbitNavigator:
         self.center.x_val += cx
         self.center.y_val += cy
 
-    def start(self):
+    def start(self) -> None:
         print("arming the drone...")
         self.client.armDisarm(True)
 
@@ -149,7 +148,7 @@ class OrbitNavigator:
 
         self.client.moveToPositionAsync(start.x_val, start.y_val, z, 2).join()
 
-    def track_orbits(self, angle):
+    def track_orbits(self, angle: float) -> bool:
         # tracking # of completed orbits is surprisingly tricky to get right in order to handle random wobbles
         # about the starting point.  So we watch for complete 1/2 orbits to avoid that problem
         if angle < 0:
@@ -206,7 +205,7 @@ class OrbitNavigator:
 
         return crossing
 
-    def take_snapshot(self):
+    def take_snapshot(self) -> None:
         if not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
 
@@ -226,7 +225,7 @@ class OrbitNavigator:
         # cause smooth ramp up to happen again after photo is taken
         self.start_time = time.time()
 
-    def sign(self, s):
+    def sign(self, s: float) -> int:
         return -1 if s < 0 else 1
 
 
