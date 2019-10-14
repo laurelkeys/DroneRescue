@@ -19,8 +19,7 @@ class Position:
 
 
 class OrbitNavigator:
-    def __init__(self, 
-                 radius: float = 2, altitude: float = 10, speed: float = 2, 
+    def __init__(self, radius: float = 2, altitude: float = 10, speed: float = 2, 
                  iterations: float = 1, center: List[float] = [1, 0], snapshots: float = None, 
                  photo_prefix: str = "photo_", image_dir: str = os.path.join(".", "images")) -> None:
         assert(len(center) == 2), "Expecting '[x,y]' for the center direction vector"
@@ -54,20 +53,6 @@ class OrbitNavigator:
         self.client.enableApiControl(True)
 
         self.home = self.client.getMultirotorState().kinematics_estimated.position
-        # check that our home position is stable
-        start = time.time()
-        count = 0
-        while count < 100:
-            pos = self.home # FIXME won't pos and self.home point to the same addr and thus always have equal z_val?
-            if abs(pos.z_val - self.home.z_val) > 1:
-                count = 0
-                self.home = pos
-                if time.time() - start > 10:
-                    print(
-                        "Drone position is drifting, we are waiting for it to settle down...")
-                    start = time
-            else:
-                count += 1
 
         self.center = self.client.getMultirotorState().kinematics_estimated.position
         self.center.x_val += cx
