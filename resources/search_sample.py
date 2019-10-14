@@ -55,8 +55,8 @@ def OrbitAnimal(cx, cy, radius, speed, altitude, camera_angle, animal):
     print("yaw is {}".format(o[2]))
 
     # let's orbit around the animal and take some photos
-    nav = drone_orbit.OrbitNavigator(photo_prefix=animal, radius=radius, altitude=altitude, speed=speed, iterations=1, center=[
-                                     cx - pos.x_val, cy - pos.y_val], snapshots=30, image_dir="./drone_images/")
+    nav = drone_orbit.OrbitNavigator(photo_prefix=animal, radius=radius, altitude=altitude, speed=speed, iterations=1, 
+                                     center=[cx - pos.x_val, cy - pos.y_val], snapshots=30, image_dir=os.path.join(".", "drone_images"))
     nav.start()
 
 

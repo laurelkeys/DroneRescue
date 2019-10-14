@@ -20,10 +20,9 @@ class Position:
 
 class OrbitNavigator:
     def __init__(self, 
-                 photo_prefix: str = "photo_", 
                  radius: float = 2, altitude: float = 10, speed: float = 2, 
                  iterations: float = 1, center: List[float] = [1, 0], snapshots: float = None, 
-                 image_dir: str = "./images/") -> None:
+                 photo_prefix: str = "photo_", image_dir: str = os.path.join(".", "images")) -> None:
         assert(len(center) == 2), "Expecting '[x,y]' for the center direction vector"
         
         self.radius         = radius
@@ -44,7 +43,7 @@ class OrbitNavigator:
 
         # center is just a direction vector, so normalize it to compute the actual cx,cy locations
         cx, cy = center
-        length = math.sqrt((cx*cx)+(cy*cy))
+        length = math.sqrt((cx*cx) + (cy*cy))
         cx /= length
         cy /= length
         cx *= self.radius
