@@ -40,9 +40,17 @@ class OrbitNavigator:
         if self.snapshots is not None and self.snapshots > 0:
             self.snapshot_delta = 360 / self.snapshots
 
-        # center is just a direction vector, so normalize it to compute the actual cx,cy locations
-        cx, cy = center
-        length = math.sqrt((cx*cx) + (cy*cy))
+        if self.iterations <= 0:
+            self.iterations = 1
+
+        if len(center) != 2:
+            raise Exception(
+                "Expecting '[x,y]' for the center direction vector")
+
+        # center is just a direction vector, so normalize it to compute the actual cx,cy locations.
+        cx = float(center[0])
+        cy = float(center[1])
+        length = math.sqrt((cx*cx)+(cy*cy))
         cx /= length
         cy /= length
         cx *= self.radius
